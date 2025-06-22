@@ -39,7 +39,7 @@ const Navbar = () => {
                 <Link href="/signup">
                     <Button
                     variant="secondary"
-                    className='text-primary-100 border-accent-500 bg-accent-500 hover:bg-accent-600 hover:border-accent-600 rounded-lg'
+                    className='text-primary-100 border-accent-500 bg-secondary-500 hover:border-accent-600 rounded-lg'
                     >Sign Up</Button>
                 </Link>
             </div>

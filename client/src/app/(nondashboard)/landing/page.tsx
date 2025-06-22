@@ -3,12 +3,14 @@
 import React from 'react'
 import Hero from './Hero'
 import Features from './Features'
+import Discover from './Discover'
 
 const Landing = () => {
   return (
     <div>
         <Hero></Hero>
         <Features></Features>
+        <Discover></Discover>
     </div>
   )
 }
