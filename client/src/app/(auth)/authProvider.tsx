@@ -1,14 +1,14 @@
 'use client'
-import { Authenticator, Heading, Placeholder, useAuthenticator, View } from '@aws-amplify/ui-react';
+import { Authenticator, Heading, Radio, RadioGroupField, useAuthenticator, View } from '@aws-amplify/ui-react';
 import { Amplify } from 'aws-amplify';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import '@aws-amplify/ui-react/styles.css';
 
 Amplify.configure({
     Auth:{
         Cognito:{
-            userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
-            userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID!,
+            userPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID!,
+            userPoolClientId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_CLIENT_ID!,
         },
     },
 });
@@ -69,6 +69,66 @@ const components = {
         </p>
       </View>
     )
+  },
+  SignIn:{
+    Footer(){
+      const {toSignUp} = useAuthenticator();
+      const router = useRouter();
+      return(
+        <View className="text-center mt-4">
+          <p className='text-muted-foreground'>
+            Don&apos;t have an account?{" "}
+     
+          <button onClick={() => {
+            toSignUp();
+            router.push('/signup');
+          }} className='text-primary hover:underline bg-transparent border-none p-0'>Sign up here</button>
+          </p>
+        </View>
+      )
+    }
+  },
+  SignUp:{
+    FormFields(){
+      const {validationErrors} = useAuthenticator();
+
+      return (
+        <>
+        <Authenticator.SignUp.FormFields/>
+
+        <RadioGroupField
+          legend="Role"
+          name="custom:role"
+          errorMessage={validationErrors?.["custom:role"]}
+          hasError={!!validationErrors?.["custom:role"]}
+          isRequired={true}
+        >
+
+          <Radio value="user">User</Radio>
+          <Radio value="owner">Owner</Radio>
+        </RadioGroupField>
+        </>
+      )
+    
+    },
+    Footer(){
+      const {toSignIn} = useAuthenticator();
+      const router = useRouter();
+      return(
+        <View className="text-center mt-4">
+          <p className='text-muted-foreground'>
+           Already have an account?{" "}
+     
+          <button onClick={() => {
+            toSignIn();
+            router.push('/signin');
+          }} className='text-primary hover:underline bg-transparent border-none p-0'>Sign in here</button>
+          </p>
+        </View>
+      )
+    }
+  
+    
   }
 }
 
@@ -85,9 +145,10 @@ const Auth = ({ children }: {children: React.ReactNode}) => {
     // Show the Authenticator UI if not signed in
     return (
       <div className='h-full'>
-        <Authenticator 
-           components={components}
-           formFields={formFields}
+        <Authenticator
+          initialState={pathname.includes("signup") ? "signUp" : "signIn"} 
+          components={components}
+          formFields={formFields}
         
         >{() => <>{children}</>}</Authenticator>
       </div>
