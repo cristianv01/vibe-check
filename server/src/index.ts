@@ -4,6 +4,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import userRoutes from "./routes/userRoutes";
+import { authMiddleWare } from "./middleware/authMiddleware";
 //Routes Imports
 
 //Config
@@ -22,6 +24,8 @@ app.use(cors());
 app.get('/', (req,res) =>{
     res.send("Health check");
 });
+
+app.use("/user",authMiddleWare(["user"]),userRoutes);
 
 //Server
 const port = process.env.port || 8000;

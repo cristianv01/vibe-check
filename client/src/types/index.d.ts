@@ -1,8 +1,7 @@
-
 import { LucideIcon } from "lucide-react";
 import { AuthUser } from "aws-amplify/auth";
 // Import all necessary types from the Prisma client
-import { User, Post, Location, Tag, OfficialResponse, Follow } from "@prisma/client";
+import { User, Owner, Post, Location, Tag, OfficialResponse, Follow } from "@prisma/client";
 
 // --- Extended Prisma Types (with relations) ---
 // It's a best practice to create specific types for frontend use that include relations.
@@ -21,28 +20,27 @@ export type UserWithRelations = User & {
   followedBy: Follow[];
 };
 
+export type OwnerWithRelations = Owner & {
+  claimedLocations: Location[];
+  officialResponses: OfficialResponse[];
+};
+
 export type LocationWithRelations = Location & {
   posts: PostWithRelations[];
-  claimedBy?: User | null;
+  claimedBy?: Owner | null;
 };
 
 
 // --- Global Declarations ---
 declare global {
 
-  // --- Enums ---
-  // Mirrors the Prisma schema for consistent usage on the client.
-  enum UserTypeEnum {
-    STANDARD = "STANDARD",
-    OWNER = "OWNER",
-  }
-
   // --- App State & Context Types ---
 
   // Represents the fully authenticated user object available throughout the app context.
   interface AuthenticatedUser {
     cognitoInfo: AuthUser; // From AWS Amplify for session/token management
-    dbInfo: User;          // From our database for profile info, etc.
+    dbInfo: User | Owner;  // From our database for profile info, etc.
+    userType: 'user' | 'owner'; // Type to distinguish between User and Owner
   }
 
 
@@ -83,14 +81,14 @@ declare global {
   
   // For the header section of a user's public profile page.
   interface ProfileHeaderProps {
-    user: UserWithRelations;
+    user: UserWithRelations | OwnerWithRelations;
     isCurrentUser: boolean; // To show/hide "Edit Profile" buttons
   }
 
   // For the form where users can update their settings.
   interface SettingsFormProps {
-    initialData: Partial<User>; // Form might only update a subset of user fields
-    onSubmit: (data: Partial<User>) => Promise<void>;
+    initialData: Partial<User | Owner>; // Form might only update a subset of user/owner fields
+    onSubmit: (data: Partial<User | Owner>) => Promise<void>;
   }
 
   // For the main application Navbar.

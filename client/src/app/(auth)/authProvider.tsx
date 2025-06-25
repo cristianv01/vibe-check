@@ -3,6 +3,7 @@ import { Authenticator, Heading, Radio, RadioGroupField, useAuthenticator, View 
 import { Amplify } from 'aws-amplify';
 import { usePathname, useRouter } from 'next/navigation';
 import '@aws-amplify/ui-react/styles.css';
+import { useEffect } from 'react';
 
 Amplify.configure({
     Auth:{
@@ -135,11 +136,21 @@ const components = {
 const Auth = ({ children }: {children: React.ReactNode}) => {
   const { user } = useAuthenticator((context) => [context.user]);
   const pathname = usePathname();
-
+  const router = useRouter();
+  //Regex checking for auth pages
   const isAuthPage = pathname.match(/^\/(signin|signup)$/);
-  
+  const isDashboard = pathname.startsWith("/user") || pathname.startsWith("/owner");
 
-  if (!isAuthPage) {
+
+  //If user is signed in redirect
+  useEffect(() =>{
+    if (user && isAuthPage){
+      router.push("/")
+    }
+  }, [user,isAuthPage,router]);
+
+  //Allows access to public pages without auth
+  if (!isAuthPage && !isDashboard) {
     return <>{children}</>
   }
     // Show the Authenticator UI if not signed in

@@ -15,16 +15,6 @@ datasource db {
 }
 
 // ----------------------------------------------
-// ENUMS - For predefined sets of values
-// ----------------------------------------------
-
-enum UserType {
-  STANDARD
-  OWNER
-}
-
-
-// ----------------------------------------------
 // MODELS - These map to the tables in your database
 // ----------------------------------------------
 
@@ -34,7 +24,6 @@ model User {
   username          String    @unique
   email             String    @unique
   profilePictureUrl String?
-  userType          UserType  @default(STANDARD)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -42,13 +31,8 @@ model User {
 
   // Posts created by this user
   posts             Post[]
-  // Locations this user has claimed (if they are an OWNER)
-  claimedLocations  Location[]
-  // Responses this user has written (if they are an OWNER)
-  officialResponses OfficialResponse[]
   // Locations this user has favorited
   favoriteLocations Favorite[]
-
   // List of users that this user follows
   following         Follow[]  @relation("UserFollows")
   // List of users that follow this user
@@ -57,24 +41,43 @@ model User {
   @@map("users") // Explicitly map to a table named "users"
 }
 
-model Location {
-  id              Int        @id @default(autoincrement())
-  name            String
-  address         String
-  // Storing coordinates using PostGIS extension
-  coordinates     Unsupported("geography(Point, 4326)")
-  claimedByUserId Int?       // Nullable: A location might not be claimed
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+model Owner {
+  id                Int       @id @default(autoincrement())
+  cognitoId         String    @unique // From AWS Cognito for authentication
+  username          String    @unique
+  email             String    @unique
+  profilePictureUrl String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   // --- Relations ---
 
-  // The owner user who claimed this location
-  claimedBy       User?      @relation(fields: [claimedByUserId], references: [id])
+  // Locations this owner has claimed
+  claimedLocations  Location[]
+  // Official responses this owner has written
+  officialResponses OfficialResponse[]
+
+  @@map("owners") // Explicitly map to a table named "owners"
+}
+
+model Location {
+  id               Int        @id @default(autoincrement())
+  name             String
+  address          String
+  // Storing coordinates using PostGIS extension
+  coordinates      Unsupported("geography(Point, 4326)")
+  claimedByOwnerId Int?       // Nullable: A location might not be claimed
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  // --- Relations ---
+
+  // The owner who claimed this location
+  claimedBy        Owner?     @relation(fields: [claimedByOwnerId], references: [id])
   // All the posts associated with this location
-  posts           Post[]
+  posts            Post[]
   // Users who have favorited this location
-  favoritedBy     Favorite[]
+  favoritedBy      Favorite[]
 
   @@map("locations")
 }
@@ -116,18 +119,17 @@ model OfficialResponse {
   id        Int      @id @default(autoincrement())
   content   String   @db.Text
   postId    Int      @unique // A post can only have one official response
-  ownerId   Int      // The user (must be an OWNER) who wrote the response
+  ownerId   Int      // The owner who wrote the response
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // --- Relations ---
 
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner     Owner    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@map("official_responses")
 }
-
 
 // ----------------------------------------------
 // JOIN MODELS - For Many-to-Many Relationships
@@ -146,7 +148,6 @@ model Follow {
   @@id([followerId, followingId]) // Composite primary key
   @@map("follows")
 }
-
 
 // Join table for Posts and Tags
 model PostTag {
