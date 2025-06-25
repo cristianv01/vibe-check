@@ -1,140 +1,104 @@
+
 import { LucideIcon } from "lucide-react";
 import { AuthUser } from "aws-amplify/auth";
-import { Manager, Tenant, Property, Application } from "./prismaTypes";
-import { MotionProps as OriginalMotionProps } from "framer-motion";
+// Import all necessary types from the Prisma client
+import { User, Post, Location, Tag, OfficialResponse, Follow } from "@prisma/client";
 
-declare module "framer-motion" {
-  interface MotionProps extends OriginalMotionProps {
-    className?: string;
-  }
-}
+// --- Extended Prisma Types (with relations) ---
+// It's a best practice to create specific types for frontend use that include relations.
+// This avoids having to pass around complex generic types from Prisma.
 
+export type PostWithRelations = Post & {
+  author: User;
+  location: Location;
+  tags: { tag: Tag }[]; // Prisma represents the link table result this way
+  officialResponse?: OfficialResponse | null;
+};
+
+export type UserWithRelations = User & {
+  posts: Post[];
+  following: Follow[];
+  followedBy: Follow[];
+};
+
+export type LocationWithRelations = Location & {
+  posts: PostWithRelations[];
+  claimedBy?: User | null;
+};
+
+
+// --- Global Declarations ---
 declare global {
-  enum AmenityEnum {
-    WasherDryer = "WasherDryer",
-    AirConditioning = "AirConditioning",
-    Dishwasher = "Dishwasher",
-    HighSpeedInternet = "HighSpeedInternet",
-    HardwoodFloors = "HardwoodFloors",
-    WalkInClosets = "WalkInClosets",
-    Microwave = "Microwave",
-    Refrigerator = "Refrigerator",
-    Pool = "Pool",
-    Gym = "Gym",
-    Parking = "Parking",
-    PetsAllowed = "PetsAllowed",
-    WiFi = "WiFi",
+
+  // --- Enums ---
+  // Mirrors the Prisma schema for consistent usage on the client.
+  enum UserTypeEnum {
+    STANDARD = "STANDARD",
+    OWNER = "OWNER",
   }
 
-  enum HighlightEnum {
-    HighSpeedInternetAccess = "HighSpeedInternetAccess",
-    WasherDryer = "WasherDryer",
-    AirConditioning = "AirConditioning",
-    Heating = "Heating",
-    SmokeFree = "SmokeFree",
-    CableReady = "CableReady",
-    SatelliteTV = "SatelliteTV",
-    DoubleVanities = "DoubleVanities",
-    TubShower = "TubShower",
-    Intercom = "Intercom",
-    SprinklerSystem = "SprinklerSystem",
-    RecentlyRenovated = "RecentlyRenovated",
-    CloseToTransit = "CloseToTransit",
-    GreatView = "GreatView",
-    QuietNeighborhood = "QuietNeighborhood",
+  // --- App State & Context Types ---
+
+  // Represents the fully authenticated user object available throughout the app context.
+  interface AuthenticatedUser {
+    cognitoInfo: AuthUser; // From AWS Amplify for session/token management
+    dbInfo: User;          // From our database for profile info, etc.
   }
 
-  enum PropertyTypeEnum {
-    Rooms = "Rooms",
-    Tinyhouse = "Tinyhouse",
-    Apartment = "Apartment",
-    Villa = "Villa",
-    Townhouse = "Townhouse",
-    Cottage = "Cottage",
-  }
 
+  // --- UI Component Prop Interfaces ---
+
+  // For links in the sidebar or other navigation elements.
   interface SidebarLinkProps {
     href: string;
     icon: LucideIcon;
     label: string;
   }
 
-  interface PropertyOverviewProps {
-    propertyId: number;
+  // For the main interactive map component.
+  interface MapViewProps {
+    locations: LocationWithRelations[];
+    initialCenter: { lat: number; lng: number };
+    onMarkerClick: (location: LocationWithRelations) => void;
   }
 
-  interface ApplicationModalProps {
+  // For displaying a single post card in a feed or as a map popup.
+  interface PostCardProps {
+    post: PostWithRelations;
+    onSelectPost?: (post: PostWithRelations) => void; // Optional for different contexts
+  }
+
+  // For the modal that shows post details or allows creation.
+  interface PostModalProps {
     isOpen: boolean;
     onClose: () => void;
-    propertyId: number;
+    post?: PostWithRelations; // Provide to view an existing post
+    location?: Location;      // Provide to create a new post for a specific location
+  }
+  
+  // For displaying a summary of a location, perhaps in search results.
+  interface LocationCardProps {
+    location: LocationWithRelations;
+  }
+  
+  // For the header section of a user's public profile page.
+  interface ProfileHeaderProps {
+    user: UserWithRelations;
+    isCurrentUser: boolean; // To show/hide "Edit Profile" buttons
   }
 
-  interface ContactWidgetProps {
-    onOpenModal: () => void;
-  }
-
-  interface ImagePreviewsProps {
-    images: string[];
-  }
-
-  interface PropertyDetailsProps {
-    propertyId: number;
-  }
-
-  interface PropertyOverviewProps {
-    propertyId: number;
-  }
-
-  interface PropertyLocationProps {
-    propertyId: number;
-  }
-
-  interface ApplicationCardProps {
-    application: Application;
-    userType: "manager" | "renter";
-    children: React.ReactNode;
-  }
-
-  interface CardProps {
-    property: Property;
-    isFavorite: boolean;
-    onFavoriteToggle: () => void;
-    showFavoriteButton?: boolean;
-    propertyLink?: string;
-  }
-
-  interface CardCompactProps {
-    property: Property;
-    isFavorite: boolean;
-    onFavoriteToggle: () => void;
-    showFavoriteButton?: boolean;
-    propertyLink?: string;
-  }
-
-  interface HeaderProps {
-    title: string;
-    subtitle: string;
-  }
-
-  interface NavbarProps {
-    isDashboard: boolean;
-  }
-
-  interface AppSidebarProps {
-    userType: "manager" | "tenant";
-  }
-
+  // For the form where users can update their settings.
   interface SettingsFormProps {
-    initialData: SettingsFormData;
-    onSubmit: (data: SettingsFormData) => Promise<void>;
-    userType: "manager" | "tenant";
+    initialData: Partial<User>; // Form might only update a subset of user fields
+    onSubmit: (data: Partial<User>) => Promise<void>;
   }
 
-  interface User {
-    cognitoInfo: AuthUser;
-    userInfo: Tenant | Manager;
-    userRole: JsonObject | JsonPrimitive | JsonArray;
+  // For the main application Navbar.
+  interface NavbarProps {
+    user?: AuthenticatedUser; // User might be logged in or not
   }
+
 }
 
+// This is required to make the file a module and allow global declarations.
 export {};
