@@ -4,10 +4,11 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import userRoutes from "./routes/userRoutes";
+
 import { authMiddleWare } from "./middleware/authMiddleware";
 //Routes Imports
-
+import userRoutes from "./routes/userRoutes";
+import ownerRoutes from "./routes/ownerRoutes";
 //Config
 dotenv.config();
 const app = express();
@@ -25,7 +26,8 @@ app.get('/', (req,res) =>{
     res.send("Health check");
 });
 
-app.use("/user",authMiddleWare(["user"]),userRoutes);
+app.use("/users",authMiddleWare(["user"]),userRoutes);
+app.use("/owners", authMiddleWare(["owner"]),ownerRoutes);
 
 //Server
 const port = process.env.port || 8000;

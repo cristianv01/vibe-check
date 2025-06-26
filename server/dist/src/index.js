@@ -9,7 +9,10 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
+const authMiddleware_1 = require("./middleware/authMiddleware");
 //Routes Imports
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const ownerRoutes_1 = __importDefault(require("./routes/ownerRoutes"));
 //Config
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -24,6 +27,8 @@ app.use((0, cors_1.default)());
 app.get('/', (req, res) => {
     res.send("Health check");
 });
+app.use("/users", (0, authMiddleware_1.authMiddleWare)(["user"]), userRoutes_1.default);
+app.use("/owners", (0, authMiddleware_1.authMiddleWare)(["owner"]), ownerRoutes_1.default);
 //Server
 const port = process.env.port || 8000;
 app.listen(port, () => {

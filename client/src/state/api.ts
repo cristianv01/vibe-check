@@ -1,6 +1,8 @@
-import { User } from "@/types/prismaTypes";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Owner, User } from "@/types/prismaTypes";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
+import { createNewUserInDatabase } from "@/lib/utils";
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
@@ -27,9 +29,13 @@ export const api = createApi({
 
           const endpoint =
             userRole === "owner" ?
-             `/owner/${user?.userId}` : `/user/${user?.userId}`;
+             `/owners/${user?.userId}` : `/users/${user?.userId}`;
           let userDetailsResponse = await fetchWithBQ(endpoint)
 
+          //If user doesnt exist
+          if (userDetailsResponse.error && userDetailsResponse.error.status === 404){
+            userDetailsResponse = await createNewUserInDatabase(user, idToken, userRole, fetchWithBQ)
+          }
           return {
             data:{
               cognitoInfo: {...user},
@@ -45,4 +51,7 @@ export const api = createApi({
   }),
 });
 
-export const {} = api;
+export const {
+  useGetAuthUserQuery,
+
+} = api;

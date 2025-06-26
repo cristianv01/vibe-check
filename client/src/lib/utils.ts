@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
@@ -63,14 +64,14 @@ export const createNewUserInDatabase = async (
   fetchWithBQ: any
 ) => {
   const createEndpoint =
-    userRole?.toLowerCase() === "manager" ? "/managers" : "/tenants";
+    userRole?.toLowerCase() === "owner" ? "/owners" : "/users";
 
   const createUserResponse = await fetchWithBQ({
     url: createEndpoint,
     method: "POST",
     body: {
       cognitoId: user.userId,
-      name: user.username,
+      username: user.username,
       email: idToken?.payload?.email || "",
       phoneNumber: "",
     },
