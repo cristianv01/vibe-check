@@ -65,6 +65,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 phoneNumber
             }
         });
+        res.json(exports.updateUser);
         res.status(201).json(user);
     }
     catch (err) {

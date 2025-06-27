@@ -89,6 +89,7 @@ declare global {
   interface SettingsFormProps {
     initialData: Partial<User | Owner>; // Form might only update a subset of user/owner fields
     onSubmit: (data: Partial<User | Owner>) => Promise<void>;
+    userType: "user" | "owner";
   }
 
   // For the main application Navbar.

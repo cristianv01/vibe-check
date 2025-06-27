@@ -18,15 +18,15 @@ const AppSideBar = ({userType}: AppSidebarProps) => {
         userType === "owner" ?
         [
             {icon: Building, label: "Owned Locations", href: "/owners/owned-locations"},
-            {icon: FileText, label: "Responses", href: "/owners/Responses"},
-            {icon: Settings, label: "Settings", href: "/owners/Settings"},
+            {icon: FileText, label: "Responses", href: "/owners/responses"},
+            {icon: Settings, label: "Settings", href: "/owners/settings"},
         ]
         :
         [
             {icon: Heart, label: "Favorites", href: "/users/favorites"},
             {icon: MessageCircle, label: "Posts", href: "/users/posts"},
             {icon: List, label: "Feed", href: "/users/feed"},
-            {icon: Settings, label: "Settings", href: "/users/Settings"},
+            {icon: Settings, label: "Settings", href: "/users/settings"},
         ]
     return (
         <Sidebar collapsible='icon' className='fixed left-0 bg-white shadow-lg' style={{top: `${NAVBAR_HEIGHT}px`, height:`calc(100vh - ${NAVBAR_HEIGHT}px)`}}>

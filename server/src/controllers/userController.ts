@@ -57,7 +57,7 @@ export const updateUser = async(req: Request, res: Response): Promise<void> =>{
                 phoneNumber
             }
         })
-
+        res.json(updateUser);
         res.status(201).json(user);
     }catch(err:any){
         res.status(500).json({message: `Error creating user ${err.message}`})

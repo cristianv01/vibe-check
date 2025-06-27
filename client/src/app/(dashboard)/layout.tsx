@@ -1,14 +1,14 @@
 "use client"
 import Navbar from "@/components/Navbar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import AppSideBar from "@/components/AppSideBar";
 import { NAVBAR_HEIGHT } from "@/lib/constants";
 import React, { useEffect, useState } from "react";
 import { useGetAuthUserQuery } from "@/state/api";
 import { usePathname, useRouter } from "next/navigation";
 
-const DashboardLayout = ({children}:{children:React.ReactNode}) => {
-
+const DashboardLayoutInner = ({children}:{children:React.ReactNode}) => {
+  const { open } = useSidebar();
   const {data: authUser, isLoading: authLoading} = useGetAuthUserQuery();
   const userType = authUser?.userRole.toLowerCase();
   const router = useRouter();
@@ -30,24 +30,34 @@ const DashboardLayout = ({children}:{children:React.ReactNode}) => {
 
   if (authLoading || isLoading) return <div>Loading...</div>;
   if (!authUser?.userRole) return null;
+  if(!userType) return null;
 
-if(!userType) return null;
   return (
-    <SidebarProvider>
     <div className="min-h-screen w-full bg-primary-100">
         <Navbar/>
         <div style={{paddingTop:`${NAVBAR_HEIGHT}px`}}>
             <main className="flex">
                 <AppSideBar userType={authUser.userRole.toLowerCase()} />
-                <div className="flex-grow transition-all duration-300">
-                    {children}
+                <div
+                  className="flex-grow transition-all duration-300"
+                  style={{
+                    marginLeft: open ? "16rem" : "3rem",
+                    minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`
+                  }}
+                >
+                  {children}
                 </div>
             </main>
         </div>
       
     </div>
-    </SidebarProvider>
   )
 }
+
+const DashboardLayout = ({children}:{children:React.ReactNode}) => (
+  <SidebarProvider>
+    <DashboardLayoutInner>{children}</DashboardLayoutInner>
+  </SidebarProvider>
+)
 
 export default DashboardLayout

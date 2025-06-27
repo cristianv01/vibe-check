@@ -7,5 +7,6 @@ const express_1 = __importDefault(require("express"));
 const ownerController_1 = require("../controllers/ownerController");
 const router = express_1.default.Router();
 router.get("/:cognitoId", ownerController_1.getOwner);
+router.put("/:cognitoId", ownerController_1.updateOwner);
 router.post("/", ownerController_1.createOwner);
 exports.default = router;

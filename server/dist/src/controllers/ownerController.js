@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOwner = exports.getOwner = void 0;
+exports.updateOwner = exports.createOwner = exports.getOwner = void 0;
 const client_1 = require("@prisma/client");
 const Prisma = new client_1.PrismaClient();
 const getOwner = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -45,3 +45,24 @@ const createOwner = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.createOwner = createOwner;
+const updateOwner = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        //We are sending it in the body, so it comes from the body
+        const { cognitoId } = req.params;
+        const { username, email, phoneNumber } = req.body;
+        const user = yield Prisma.owner.update({
+            where: { cognitoId },
+            data: {
+                username,
+                email,
+                phoneNumber
+            }
+        });
+        res.json(exports.updateOwner);
+        res.status(201).json(user);
+    }
+    catch (err) {
+        res.status(500).json({ message: `Error creating user ${err.message}` });
+    }
+});
+exports.updateOwner = updateOwner;

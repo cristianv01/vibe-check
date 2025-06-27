@@ -36,3 +36,25 @@ export const createOwner = async(req: Request, res: Response): Promise<void> =>{
         res.status(500).json({message: `Error creating owner ${err.message}`})
     }
 }
+
+
+export const updateOwner = async(req: Request, res: Response): Promise<void> =>{
+    try{
+        //We are sending it in the body, so it comes from the body
+        const {cognitoId} = req.params;
+        const {username, email, phoneNumber} = req.body;
+        const user = await Prisma.owner.update({
+            where: {cognitoId},
+            data: {
+                username,
+                email,
+                phoneNumber
+            }
+        })
+        res.json(updateOwner);
+        res.status(201).json(user);
+    }catch(err:any){
+        res.status(500).json({message: `Error creating user ${err.message}`})
+    }
+}
+
