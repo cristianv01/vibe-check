@@ -68,6 +68,7 @@ model Location {
   address          String
   // Storing coordinates using PostGIS extension
   coordinates      Unsupported("geography(Point, 4326)")
+  status           LocationStatus     @default(UNVERIFIED)
   claimedByOwnerId Int?       // Nullable: A location might not be claimed
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
@@ -86,6 +87,7 @@ model Location {
 
 model Post {
   id          Int      @id @default(autoincrement())
+  title       String?   
   content     String   @db.Text // Use Text type for potentially long reviews
   mediaUrl    String?  // Link to media file on AWS S3
   authorId    Int
@@ -105,6 +107,11 @@ model Post {
   @@map("posts")
 }
 
+enum LocationStatus {
+  UNVERIFIED
+  VERIFIED
+  ARCHIVED
+}
 model Tag {
   id      Int      @id @default(autoincrement())
   tagName String   @unique @db.VarChar(50) // e.g., "#LGBTQFriendly"

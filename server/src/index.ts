@@ -9,6 +9,8 @@ import { authMiddleWare } from "./middleware/authMiddleware";
 //Routes Imports
 import userRoutes from "./routes/userRoutes";
 import ownerRoutes from "./routes/ownerRoutes";
+import locationRoutes from "./routes/locationRoutes";
+import postRoutes from "./routes/postRoutes";
 //Config
 dotenv.config();
 const app = express();
@@ -28,6 +30,9 @@ app.get('/', (req,res) =>{
 
 app.use("/users",authMiddleWare(["user"]),userRoutes);
 app.use("/owners", authMiddleWare(["owner"]),ownerRoutes);
+app.use("/locations", locationRoutes);
+app.use("/posts", postRoutes);
+
 
 //Server
 const port = process.env.port || 8000;
