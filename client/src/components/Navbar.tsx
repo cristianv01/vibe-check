@@ -1,3 +1,4 @@
+"use client"
 import { NAVBAR_HEIGHT } from '@/lib/constants'
 import Link from 'next/link'
 import Image from 'next/image'
