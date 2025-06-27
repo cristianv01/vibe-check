@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
 import { usePathname } from 'next/navigation'
-import { Sidebar, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarContent, SidebarMenuButton, useSidebar, SidebarGroupContent } from './ui/sidebar'
+import { Sidebar, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarContent, SidebarMenuButton, useSidebar } from './ui/sidebar'
 import { Building, FileText, Heart, List, Menu, MessageCircle, Settings, X } from 'lucide-react';
 import { NAVBAR_HEIGHT } from '@/lib/constants';
 import { cn } from '@/lib/utils';

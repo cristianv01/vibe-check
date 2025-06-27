@@ -4,6 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 import { createNewUserInDatabase } from "@/lib/utils";
 
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -17,7 +18,7 @@ export const api = createApi({
     }
   }),
   reducerPath: "api",
-  tagTypes: [],
+  tagTypes: ["Owners", "Users"],
   endpoints: (build) => ({
     getAuthUser: build.query<User, void>({
       queryFn: async(_, _queryApi, _extraOptions, fetchWithBQ)=>{
@@ -47,11 +48,30 @@ export const api = createApi({
           return {error:error.message || "Failed to fetch user details"}
         }
       }
-  })
   }),
+  updateUserSettings: build.mutation<User, {cognitoId: string} & Partial<User>>({
+    query: ({cognitoId, ...updatedUser}) => ({
+      url: `users/${cognitoId}`,
+      method: "PUT",
+      body: updatedUser,
+    }),
+    invalidatesTags:(result) => [{type:"Users", id: result?.id}],
+  }),
+  updateOwnerSettings: build.mutation<Owner, {cognitoId: string} & Partial<Owner>>({
+    query: ({cognitoId, ...updatedOwner}) => ({
+      url: `owners/${cognitoId}`,
+      method: "PUT",
+      body: updatedOwner,
+    }),
+    invalidatesTags:(result) => [{type:"Owners", id: result?.id}],
+  })
+
+}),
+  
 });
 
 export const {
   useGetAuthUserQuery,
-
+  useUpdateUserSettingsMutation,
+  useUpdateOwnerSettingsMutation,
 } = api;
