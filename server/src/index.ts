@@ -11,6 +11,7 @@ import userRoutes from "./routes/userRoutes";
 import ownerRoutes from "./routes/ownerRoutes";
 import locationRoutes from "./routes/locationRoutes";
 import postRoutes from "./routes/postRoutes";
+import uploadRoutes from "./routes/uploadRoutes";
 //Config
 dotenv.config();
 const app = express();
@@ -32,10 +33,11 @@ app.use("/users",authMiddleWare(["user"]),userRoutes);
 app.use("/owners", authMiddleWare(["owner"]),ownerRoutes);
 app.use("/locations", locationRoutes);
 app.use("/posts", postRoutes);
+app.use("/upload", uploadRoutes);
 
 
 //Server
-const port = process.env.port || 8000;
-app.listen(port, () =>{
+const port = Number(process.env.port) || 8000;
+app.listen(port, "0.0.0.0", () =>{
     console.log(`Server running on port ${port}`);
 });

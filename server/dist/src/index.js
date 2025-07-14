@@ -15,6 +15,7 @@ const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const ownerRoutes_1 = __importDefault(require("./routes/ownerRoutes"));
 const locationRoutes_1 = __importDefault(require("./routes/locationRoutes"));
 const postRoutes_1 = __importDefault(require("./routes/postRoutes"));
+const uploadRoutes_1 = __importDefault(require("./routes/uploadRoutes"));
 //Config
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -33,8 +34,9 @@ app.use("/users", (0, authMiddleware_1.authMiddleWare)(["user"]), userRoutes_1.d
 app.use("/owners", (0, authMiddleware_1.authMiddleWare)(["owner"]), ownerRoutes_1.default);
 app.use("/locations", locationRoutes_1.default);
 app.use("/posts", postRoutes_1.default);
+app.use("/upload", uploadRoutes_1.default);
 //Server
-const port = process.env.port || 8000;
-app.listen(port, () => {
+const port = Number(process.env.port) || 8000;
+app.listen(port, "0.0.0.0", () => {
     console.log(`Server running on port ${port}`);
 });

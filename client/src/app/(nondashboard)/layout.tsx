@@ -19,11 +19,12 @@ const Layout = ({children}: {children: React.ReactNode}) => {
         userRole === "owner" && pathname === '/'){
             router.push("/owners/owned-properties", {scroll:false});
         }
-    }else{
+        setIsLoading(false);
+    }else if(!authLoading){
         setIsLoading(false);
     }
    
-  }, [authUser,pathname,router])
+  }, [authUser, pathname, router, authLoading])
 
   if (authLoading || isLoading) return <div>Loading...</div>;
 

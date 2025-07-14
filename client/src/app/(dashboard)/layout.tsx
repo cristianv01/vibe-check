@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import Navbar from "@/components/Navbar";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
@@ -27,8 +28,8 @@ const DashboardLayoutInner = ({children}:{children:React.ReactNode}) => {
     }
    
   }, [authUser,pathname,router])
-
-  if (authLoading || isLoading) return <div>Loading...</div>;
+  //TODO: fix loading state
+  // if (authLoading || isLoading) return <div>Loading...</div>;
   if (!authUser?.userRole) return null;
   if(!userType) return null;
 

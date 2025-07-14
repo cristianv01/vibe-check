@@ -34,6 +34,8 @@ model User {
   posts             Post[]
   // Locations this user has favorited
   favoriteLocations Favorite[]
+  // Posts this user has favorited
+  favoritePosts     PostFavorite[]
   // List of users that this user follows
   following         Follow[]  @relation("UserFollows")
   // List of users that follow this user
@@ -101,6 +103,8 @@ model Post {
   location      Location    @relation(fields: [locationId], references: [id], onDelete: Cascade)
   // The tags associated with this post (via a join table)
   tags          PostTag[]
+  // Users who have favorited this post
+  favoritedBy   PostFavorite[]
   // An official response from the location owner (if one exists)
   officialResponse OfficialResponse?
 
@@ -185,4 +189,19 @@ model Favorite {
 
   @@id([userId, locationId]) // Composite primary key
   @@map("favorites")
+}
+
+// Join table for Users and their favorited Posts
+model PostFavorite {
+  userId Int
+  postId Int
+  createdAt DateTime @default(now())
+
+  // --- Relations ---
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId]) // Composite primary key
+  @@map("post_favorites")
 }

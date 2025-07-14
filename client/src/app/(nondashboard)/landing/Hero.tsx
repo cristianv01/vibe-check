@@ -1,10 +1,44 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import { useDispatch } from 'react-redux'
+import { useRouter } from 'next/navigation'
+import { setFilters } from '@/state'
 const Hero = () => {
+
+    const dispatch = useDispatch();
+    const [search, setSearchQuery] = useState("");
+    const router = useRouter(); 
+
+    const handleSearch = async () =>{
+        try{
+            const trimmedSearch = search.trim();
+            if(!trimmedSearch) return;
+
+            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(trimmedSearch)}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}&fuzzyMatch=true`);
+
+            const data = await response.json();
+            if (data.features && data.features.length > 0){
+                const [lng, lat] = data.features[0].center;
+                dispatch(setFilters({
+                    location: trimmedSearch,
+                    coordinates: [lng, lat]
+                }));
+                const params = new URLSearchParams({
+                    location: trimmedSearch,
+                    lng: lng.toString(),
+                    lat: lat.toString()
+                });
+                router.push(`/search?${params.toString()}`);
+            }
+        } catch (error) {
+            console.error('Error searching location:', error);
+        }
+    };
+    
   return (
     <div className='relative h-screen'>
         <Image
@@ -30,12 +64,16 @@ const Hero = () => {
                     Explore local communities, find hidden gems, and get and inside look from locals.
                 </p>
                 <div className='flex justify-center'>
-                    <Input type='text' placeholder='Search by city, neighborhood, or address' onChange={() =>{}} className='w-full max-w-lg rounded-none rounded-l-xl border-none bg-white h-12'>
-                    
-                    </Input>
+                    <Input 
+                        type='text' 
+                        value={search} 
+                        placeholder='Search by city, neighborhood, or address' 
+                        onChange={(e) => setSearchQuery(e.target.value)} 
+                        className='w-full max-w-lg rounded-none rounded-l-xl border-none bg-white h-12'
+                    />
                     <Button
-                    onClick={() => {}}
-                    className='bg-secondary-500 text-white hover:bg-secondary-500 text-white rounded-none rounded-r-xl border-none hover:bg-secondary-600 h-12'
+                        onClick={handleSearch}
+                        className='bg-secondary-500 text-white hover:bg-secondary-500 text-white rounded-none rounded-r-xl border-none hover:bg-secondary-600 h-12'
                     >
                         Search
                     </Button>
@@ -45,6 +83,6 @@ const Hero = () => {
         </motion.div>
     </div>
   );
-}
+};
 
 export default Hero;

@@ -16,7 +16,7 @@ export const getPosts = async (
       offset = 0,
       lat,
       lng,
-      radius = 10,
+      radius = 5,
       search
     } = req.query;
 
@@ -171,106 +171,116 @@ export const createPost = async (
       locationAddress, 
       latitude, 
       longitude,
-      tags = []
+      tags = [],
+      mediaUrl
     } = req.body;
 
-    // TEMPORARY: For testing without auth
-    // const userId = req.user?.id;
-    // if (!userId) {
-    //   res.status(401).json({ message: "User not authenticated" });
-    //   return;
-    // }
+    // Validate required fields
+    if (!content || !locationName || !locationAddress || !latitude || !longitude) {
+      res.status(400).json({ 
+        message: "Missing required fields: content, locationName, locationAddress, latitude, longitude" 
+      });
+      return;
+    }
 
-    // Create a test user if it doesn't exist
-    let user = await prisma.user.findUnique({
-      where: { cognitoId: 'test-user-123' }
+    // Validate coordinates
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      res.status(400).json({ message: "Invalid coordinates" });
+      return;
+    }
+
+    // Get authenticated user (replace with your actual auth logic)
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "User not authenticated" });
+      return;
+    }
+
+    // Verify user exists
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId as string) }
     });
 
     if (!user) {
-      // Create test user using Prisma ORM
-      user = await prisma.user.create({
-        data: {
-          cognitoId: 'test-user-123',
-          username: 'testuser',
-          email: 'test@example.com'
-        }
-      });
+      res.status(404).json({ message: "User not found" });
+      return;
     }
 
     // Find or create location
     const location = await findOrCreateLocation(
       locationName,
       locationAddress,
-      parseFloat(latitude),
-      parseFloat(longitude)
+      lat,
+      lng
     );
 
-    // Create post with media URLs
-    const postQuery = Prisma.sql`
-      INSERT INTO posts (title, content, "mediaUrl", "authorId", "locationId", "createdAt", "updatedAt")
-      VALUES (${title}, ${content}, null, ${user.id}, ${location.id}, NOW(), NOW())
-      RETURNING *
-    `;
-
-    const newPosts = await prisma.$queryRaw(postQuery);
-    const newPost = (newPosts as any[])[0];
+    // Create post
+    const post = await prisma.post.create({
+      data: {
+        title: title || null,
+        content,
+        mediaUrl: mediaUrl || null,
+        authorId: user.id,
+        locationId: location.id,
+      }
+    });
 
     // Handle tags if provided
     if (tags.length > 0) {
       for (const tagName of tags) {
         // Find or create tag
-        let tagQuery = Prisma.sql`
-          SELECT id FROM tags WHERE "tagName" = ${tagName}
-        `;
-        let tags = await prisma.$queryRaw(tagQuery);
-        let tag = (tags as any[])[0];
+        let tag = await prisma.tag.findUnique({
+          where: { tagName }
+        });
 
         if (!tag) {
-          const createTagQuery = Prisma.sql`
-            INSERT INTO tags ("tagName") VALUES (${tagName}) RETURNING id
-          `;
-          const newTags = await prisma.$queryRaw(createTagQuery);
-          tag = (newTags as any[])[0];
+          tag = await prisma.tag.create({
+            data: { tagName }
+          });
         }
 
         // Connect tag to post
-        await prisma.$executeRaw`
-          INSERT INTO post_tags ("postId", "tagId") VALUES (${newPost.id}, ${tag.id})
-        `;
+        await prisma.postTag.create({
+          data: {
+            postId: post.id,
+            tagId: tag.id
+          }
+        });
       }
     }
 
     // Return post with full details
-    const fullPostQuery = Prisma.sql`
-      SELECT 
-        p.*,
-        json_build_object(
-          'username', u.username,
-          'profilePictureUrl', u."profilePictureUrl"
-        ) as author,
-        json_build_object(
-          'id', l.id,
-          'name', l.name,
-          'address', l.address,
-          'status', l.status
-        ) as location,
-        json_agg(
-          json_build_object(
-            'id', t.id,
-            'tagName', t."tagName"
-          )
-        ) FILTER (WHERE t.id IS NOT NULL) as tags
-      FROM posts p
-      LEFT JOIN users u ON p."authorId" = u.id
-      LEFT JOIN locations l ON p."locationId" = l.id
-      LEFT JOIN post_tags pt ON p.id = pt."postId"
-      LEFT JOIN tags t ON pt."tagId" = t.id
-      WHERE p.id = ${newPost.id}
-      GROUP BY p.id, u.username, u."profilePictureUrl", l.id, l.name, l.address, l.status
-    `;
-
-    const fullPosts = await prisma.$queryRaw(fullPostQuery);
-    const fullPost = (fullPosts as any[])[0];
+    const fullPost = await prisma.post.findUnique({
+      where: { id: post.id },
+      include: {
+        author: {
+          select: {
+            username: true,
+            profilePictureUrl: true
+          }
+        },
+        location: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            status: true
+          }
+        },
+        tags: {
+          include: {
+            tag: {
+              select: {
+                id: true,
+                tagName: true
+              }
+            }
+          }
+        }
+      }
+    });
 
     res.status(201).json(fullPost);
   } catch (err: any) {
