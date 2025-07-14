@@ -13,9 +13,7 @@ import { Label } from './ui/label'
 import { Input } from './ui/input'
 
 const CreatePost = () => {
-    const autoFill = new MapBoxAddressAutofill({
-        accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
-    })
+  
   return (
     <Dialog>
         <form>
