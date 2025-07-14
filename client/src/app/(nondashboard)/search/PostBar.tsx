@@ -106,9 +106,9 @@ const PostBar = () => {
                     <span className="text-gray-700 font-normal">
                         Posts in {filters.location || "All Locations"}
                     </span>
-                    {filters.coordinates && filters.coordinates.length === 2 && (
+                    {filters.coordinates && filters.coordinates.length === 2 && !filters.location && (
                         <span className="text-xs text-blue-600 ml-2">
-                            📍 {filters.coordinates[1].toFixed(4)}, {filters.coordinates[0].toFixed(4)}
+                            📍 (Geolocated at {filters.coordinates[1].toFixed(4)}, {filters.coordinates[0].toFixed(4)})
                         </span>
                     )}
                 </h3>

@@ -61,12 +61,15 @@ const getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             'latitude', ST_Y(l.coordinates::geometry)
           )
         ) as location,
-        json_agg(
-          json_build_object(
-            'id', t.id,
-            'tagName', t."tagName"
-          )
-        ) FILTER (WHERE t.id IS NOT NULL) as tags
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', t.id,
+              'tagName', t."tagName"
+            )
+          ) FILTER (WHERE t.id IS NOT NULL),
+          '[]'::json
+        ) as tags
       FROM posts p
       LEFT JOIN users u ON p."authorId" = u.id
       LEFT JOIN locations l ON p."locationId" = l.id
@@ -109,12 +112,15 @@ const getPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             'latitude', ST_Y(l.coordinates::geometry)
           )
         ) as location,
-        json_agg(
-          json_build_object(
-            'id', t.id,
-            'tagName', t."tagName"
-          )
-        ) FILTER (WHERE t.id IS NOT NULL) as tags
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', t.id,
+              'tagName', t."tagName"
+            )
+          ) FILTER (WHERE t.id IS NOT NULL),
+          '[]'::json
+        ) as tags
       FROM posts p
       LEFT JOIN users u ON p."authorId" = u.id
       LEFT JOIN locations l ON p."locationId" = l.id

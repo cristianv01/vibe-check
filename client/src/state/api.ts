@@ -84,7 +84,8 @@ export const api = createApi({
       // Add filter parameters to query string
       if (params.location) searchParams.append('location', params.location);
       if (params.tags && params.tags.length > 0) searchParams.append('tags', params.tags.join(','));
-      if (params.coordinates && params.coordinates.length === 2) {
+      // Only send coordinates if a specific location is selected (not just geolocated)
+      if (params.location && params.coordinates && params.coordinates.length === 2) {
         searchParams.append('lat', params.coordinates[1].toString());  // latitude
         searchParams.append('lng', params.coordinates[0].toString());  // longitude
         searchParams.append('radius', '50');  // 500km radius to see posts in NY from VA

@@ -36,7 +36,7 @@ app.use("/locations", locationRoutes_1.default);
 app.use("/posts", postRoutes_1.default);
 app.use("/upload", uploadRoutes_1.default);
 //Server
-const port = Number(process.env.port) || 8000;
+const port = Number(process.env.PORT) || 8000;
 app.listen(port, "0.0.0.0", () => {
     console.log(`Server running on port ${port}`);
 });

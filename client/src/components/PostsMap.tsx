@@ -129,7 +129,7 @@ export default function PostsMap({
             <h3 class="font-semibold text-gray-900 truncate">${post.location.name}</h3>
             <p class="text-sm text-gray-600">by ${post.author.username}</p>
             <p class="text-sm text-gray-800 mt-1 line-clamp-2">${post.content}</p>
-            ${post.tags.length > 0 ? `
+            ${post.tags && post.tags.length > 0 ? `
               <div class="flex flex-wrap gap-1 mt-2">
                 ${post.tags.slice(0, 3).map(tag => 
                   `<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">${tag.tagName}</span>`

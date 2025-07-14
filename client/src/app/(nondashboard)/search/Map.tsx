@@ -205,7 +205,7 @@ const createMarker = (post: Post, map: mapboxgl.Map, customCoordinates?: [number
                 <h3 class="marker-popup-title">${post.title || 'Untitled Post'}</h3>
                 <p class="text-sm text-gray-300 mb-2">by ${post.author.username}</p>
                 <p class="text-sm mb-2">${post.content.substring(0, 100)}${post.content.length > 100 ? '...' : ''}</p>
-                ${post.tags.length > 0 ? `
+                ${post.tags && post.tags.length > 0 ? `
                     <div class="flex flex-wrap gap-1">
                         ${post.tags.slice(0, 3).map((tag: { id: number; tagName: string }) => 
                             `<span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">${tag.tagName}</span>`

@@ -161,12 +161,15 @@ export const getLocation = async (
           'username', u.username,
           'profilePictureUrl', u."profilePictureUrl"
         ) as author,
-        json_agg(
-          json_build_object(
-            'id', t.id,
-            'tagName', t."tagName"
-          )
-        ) FILTER (WHERE t.id IS NOT NULL) as tags
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', t.id,
+              'tagName', t."tagName"
+            )
+          ) FILTER (WHERE t.id IS NOT NULL),
+          '[]'::json
+        ) as tags
       FROM posts p
       LEFT JOIN users u ON p."authorId" = u.id
       LEFT JOIN post_tags pt ON p.id = pt."postId"
