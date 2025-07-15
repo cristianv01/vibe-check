@@ -77,7 +77,7 @@ export const api = createApi({
     invalidatesTags:(result) => [{type:"Owners", id: result?.id}],
   }),
   //Post related endpoints
-  getPosts: build.query<Post[], Partial<FiltersState> & {favoriteIds?: number[]}>({
+  getPosts: build.query<Post[], Partial<FiltersState> & {favoriteIds?: number[], authorId?: number}>({
     query: (params) => {
       const searchParams = new URLSearchParams();
       
@@ -96,6 +96,7 @@ export const api = createApi({
       if (params.page) searchParams.append('page', params.page.toString());
       if (params.limit) searchParams.append('limit', params.limit.toString());
       if (params.favoriteIds && params.favoriteIds.length > 0) searchParams.append('favoriteIds', params.favoriteIds.join(','));
+      if (params.authorId) searchParams.append('authorId', params.authorId.toString());
       
       return {
         url: `/posts?${searchParams.toString()}`,
@@ -116,6 +117,30 @@ export const api = createApi({
           });
    
       }
+  }),
+
+  createPost: build.mutation<Post, {
+    title?: string;
+    content: string;
+    locationName: string;
+    locationAddress: string;
+    latitude: number;
+    longitude: number;
+    tags?: string[];
+    mediaUrl?: string;
+  }>({
+    query: (postData) => ({
+      url: '/posts',
+      method: 'POST',
+      body: postData,
+    }),
+    invalidatesTags: () => [{ type: 'Posts', id: 'LIST' }],
+    async onQueryStarted(_, { queryFulfilled }) {
+      await withToast(queryFulfilled, {
+        success: "Post created successfully!",
+        error: "Failed to create post.",
+      });
+    }
   }),
 
 
@@ -158,6 +183,26 @@ export const api = createApi({
   }
   }),
 
+  // Upload related endpoints
+  generateUploadUrl: build.mutation<{
+    uploadUrl: string;
+    fileKey: string;
+    fileUrl: string;
+  }, {
+    fileType: string;
+    fileName?: string;
+    folder?: string;
+  }>({
+    query: (uploadData) => ({
+      url: '/upload/presigned-url',
+      method: 'POST',
+      body: uploadData,
+    }),
+    invalidatesTags: () => [], // No tags to invalidate for upload URLs
+    async onQueryStarted(_, { queryFulfilled }) {
+      // Optional: Add any side effects here if needed
+    }
+  }),
 
 }),
   
@@ -168,6 +213,8 @@ export const {
   useUpdateUserSettingsMutation,
   useUpdateOwnerSettingsMutation,
   useGetPostsQuery,
+  useCreatePostMutation,
   useAddFavoritePostMutation,
   useRemoveFavoritePostMutation,
+  useGenerateUploadUrlMutation,
 } = api;

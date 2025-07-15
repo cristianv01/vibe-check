@@ -13,6 +13,13 @@ exports.S3Service = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const uuid_1 = require("uuid");
+// Validate required environment variables
+if (!process.env.AWS_ACCESS_KEY_ID) {
+    throw new Error('AWS_ACCESS_KEY_ID environment variable is required');
+}
+if (!process.env.AWS_SECRET_ACCESS_KEY) {
+    throw new Error('AWS_SECRET_ACCESS_KEY environment variable is required');
+}
 const s3Client = new client_s3_1.S3Client({
     region: process.env.AWS_REGION || 'us-east-1',
     credentials: {
@@ -21,6 +28,9 @@ const s3Client = new client_s3_1.S3Client({
     },
 });
 const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
+if (!BUCKET_NAME) {
+    throw new Error('AWS_S3_BUCKET_NAME environment variable is required');
+}
 class S3Service {
     /**
      * Generate a pre-signed URL for direct upload to S3
@@ -63,7 +73,7 @@ class S3Service {
      */
     static deleteFile(fileKey) {
         return __awaiter(this, void 0, void 0, function* () {
-            const command = new client_s3_1.PutObjectCommand({
+            const command = new client_s3_1.DeleteObjectCommand({
                 Bucket: BUCKET_NAME,
                 Key: fileKey,
             });

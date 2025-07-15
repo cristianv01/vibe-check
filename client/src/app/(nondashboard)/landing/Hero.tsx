@@ -72,8 +72,8 @@ const Hero = () => {
                         className='w-full max-w-lg rounded-none rounded-l-xl border-none bg-white h-12'
                     />
                     <Button
-                        onClick={handleSearch}
-                        className='bg-secondary-500 text-white hover:bg-secondary-500 text-white rounded-none rounded-r-xl border-none hover:bg-secondary-600 h-12'
+                    onClick={handleSearch}
+                    className='bg-secondary-500 text-white hover:bg-secondary-500 text-white rounded-none rounded-r-xl border-none hover:bg-secondary-600 h-12'
                     >
                         Search
                     </Button>

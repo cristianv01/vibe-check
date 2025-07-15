@@ -7,6 +7,8 @@ import { NAVBAR_HEIGHT } from "@/lib/constants";
 import React, { useEffect, useState } from "react";
 import { useGetAuthUserQuery } from "@/state/api";
 import { usePathname, useRouter } from "next/navigation";
+import CreatePost from "@/components/CreatePost";
+import { Plus } from "lucide-react";
 
 const DashboardLayoutInner = ({children}:{children:React.ReactNode}) => {
   const { open } = useSidebar();
@@ -50,7 +52,13 @@ const DashboardLayoutInner = ({children}:{children:React.ReactNode}) => {
                 </div>
             </main>
         </div>
-      
+        
+        {/* Floating Action Button for Create Post - Only show for users */}
+        {userType === 'user' && (
+          <div className="fixed bottom-6 right-6 z-50">
+            <CreatePost variant="fab" />
+          </div>
+        )}
     </div>
   )
 }

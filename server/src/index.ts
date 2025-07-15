@@ -12,17 +12,39 @@ import ownerRoutes from "./routes/ownerRoutes";
 import locationRoutes from "./routes/locationRoutes";
 import postRoutes from "./routes/postRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
+
 //Config
 dotenv.config();
 const app = express();
-app.use(express.json());
-app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({policy: "cross-origin"}));
-app.use(morgan("common"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(cors());
 
+// CORS configuration
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'], // Allow frontend origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// Body parser configuration with increased limits for image uploads
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+// Helmet configuration
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+}));
+
+app.use(morgan("common"));
 
 //Routes
 app.get('/', (req,res) =>{
@@ -34,7 +56,6 @@ app.use("/owners", authMiddleWare(["owner"]),ownerRoutes);
 app.use("/locations", locationRoutes);
 app.use("/posts", postRoutes);
 app.use("/upload", uploadRoutes);
-
 
 //Server
 const port = Number(process.env.PORT) || 8000;

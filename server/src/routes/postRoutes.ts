@@ -15,7 +15,7 @@ router.get("/", getPosts);
 router.get("/:id", getPost);
 
 // Protected routes (authenticated users)
-router.post("/", createPost);
+router.post("/", authMiddleWare(["user"]), createPost);
 router.put("/:id", authMiddleWare(["user"]), updatePost);
 router.delete("/:id", authMiddleWare(["user", "admin"]), deletePost);
 

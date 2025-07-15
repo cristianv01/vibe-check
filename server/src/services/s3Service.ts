@@ -1,16 +1,27 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from 'uuid';
+
+// Validate required environment variables
+if (!process.env.AWS_ACCESS_KEY_ID) {
+  throw new Error('AWS_ACCESS_KEY_ID environment variable is required');
+}
+if (!process.env.AWS_SECRET_ACCESS_KEY) {
+  throw new Error('AWS_SECRET_ACCESS_KEY environment variable is required');
+}
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'us-east-1',
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME!;
+const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
+if (!BUCKET_NAME) {
+  throw new Error('AWS_S3_BUCKET_NAME environment variable is required');
+}
 
 export interface UploadParams {
   fileType: string;
@@ -65,7 +76,7 @@ export class S3Service {
    * Delete a file from S3
    */
   static async deleteFile(fileKey: string): Promise<void> {
-    const command = new PutObjectCommand({
+    const command = new DeleteObjectCommand({
       Bucket: BUCKET_NAME,
       Key: fileKey,
     });

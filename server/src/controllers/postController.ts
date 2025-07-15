@@ -182,31 +182,39 @@ export const createPost = async (
     } = req.body;
 
     // Validate required fields
-    if (!content || !locationName || !locationAddress || !latitude || !longitude) {
+    if (!content || !locationName || !locationAddress || latitude === undefined || longitude === undefined) {
       res.status(400).json({ 
         message: "Missing required fields: content, locationName, locationAddress, latitude, longitude" 
       });
       return;
     }
 
-    // Validate coordinates
+    // Validate coordinates (allow 0,0 for manual location input)
     const lat = parseFloat(latitude);
     const lng = parseFloat(longitude);
-    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    if (isNaN(lat) || isNaN(lng)) {
       res.status(400).json({ message: "Invalid coordinates" });
       return;
     }
+    
+    // If coordinates are provided (not 0,0), validate them
+    if (lat !== 0 || lng !== 0) {
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        res.status(400).json({ message: "Invalid coordinates" });
+        return;
+      }
+    }
 
-    // Get authenticated user (replace with your actual auth logic)
-    const userId = req.user?.id;
-    if (!userId) {
+    // Get authenticated user
+    const cognitoId = req.user?.id;
+    if (!cognitoId) {
       res.status(401).json({ message: "User not authenticated" });
       return;
     }
 
     // Verify user exists
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(userId as string) }
+      where: { cognitoId: cognitoId as string }
     });
 
     if (!user) {
@@ -215,12 +223,26 @@ export const createPost = async (
     }
 
     // Find or create location
-    const location = await findOrCreateLocation(
-      locationName,
-      locationAddress,
-      lat,
-      lng
-    );
+    let location;
+    if (lat === 0 && lng === 0) {
+      // For manual location input without coordinates, use a default location
+      // We'll use a placeholder coordinate that can be updated later
+      const createLocationQuery = Prisma.sql`
+        INSERT INTO locations (name, address, coordinates, status, "createdAt", "updatedAt")
+        VALUES (${locationName}, ${locationAddress}, ST_SetSRID(ST_MakePoint(0, 0), 4326), 'UNVERIFIED', NOW(), NOW())
+        RETURNING id, name, address, status
+      `;
+      const newLocations = await prisma.$queryRaw(createLocationQuery);
+      location = (newLocations as any[])[0];
+    } else {
+      // For geolocated locations, use the existing findOrCreateLocation function
+      location = await findOrCreateLocation(
+        locationName,
+        locationAddress,
+        lat,
+        lng
+      );
+    }
 
     // Create post
     const post = await prisma.post.create({

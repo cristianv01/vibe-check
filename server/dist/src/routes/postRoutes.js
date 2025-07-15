@@ -11,7 +11,7 @@ const router = express_1.default.Router();
 router.get("/", postController_1.getPosts);
 router.get("/:id", postController_1.getPost);
 // Protected routes (authenticated users)
-router.post("/", postController_1.createPost);
+router.post("/", (0, authMiddleware_1.authMiddleWare)(["user"]), postController_1.createPost);
 router.put("/:id", (0, authMiddleware_1.authMiddleWare)(["user"]), postController_1.updatePost);
 router.delete("/:id", (0, authMiddleware_1.authMiddleWare)(["user", "admin"]), postController_1.deletePost);
 exports.default = router;
