@@ -37,12 +37,12 @@ const PostBar = () => {
     const handleFavoriteToggle = async(postId: number) =>{
         if (!authUser) return ;
         
-        const isFavorite = authUser.userInfo.favoritePosts?.some(
+        const isFavorite = authUser?.userInfo?.favoritePosts?.some(
             (fav: FavoritePost) => fav.post.id === postId
         ) || false;
 
         console.log('Current favorite state:', isFavorite, 'for post:', postId)
-        console.log('Current favorites:', authUser.userInfo.favoritePosts)
+        console.log('Current favorites:', authUser?.userInfo?.favoritePosts)
 
         try {
             if (isFavorite){

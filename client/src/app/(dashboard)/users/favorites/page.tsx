@@ -36,7 +36,7 @@ const Favorites = () => {
   const handleFavoriteToggle = async(postId: number) =>{
     if (!authUser) return ;
     
-    const isFavorite = authUser.userInfo.favoritePosts?.some(
+    const isFavorite = authUser?.userInfo?.favoritePosts?.some(
         (fav: FavoritePost) => fav.post.id === postId
     ) || false;
 
