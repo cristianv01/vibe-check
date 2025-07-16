@@ -8,7 +8,7 @@ export default function Home() {
       <Navbar/>
       <main 
         className="h-full flex w-full flex-col"
-        style={{ paddingTop: `${NAVBAR_HEIGHT}px` }}
+       
       >
         <LandingPage/>
       </main> 

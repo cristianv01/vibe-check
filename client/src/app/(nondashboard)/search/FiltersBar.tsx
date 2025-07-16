@@ -138,27 +138,7 @@ const FiltersBar = () => {
             </Button>
           </div>
           
-          {/* Reset to My Location */}
-          {filters.coordinates && (
-            <Button
-              variant="outline"
-              className="gap-2 rounded-xl border-primary-400 hover:bg-primary-500 hover:text-primary-100"
-              onClick={() => {
-                // Clear the location search and let the map use user location
-                const newFilters = {
-                  ...filters,
-                  location: "",
-                  coordinates: null
-                };
-                dispatch(setFilters(newFilters));
-                updateUrl(newFilters);
-                setSearchInput("");
-              }}
-            >
-              📍 My Location
-            </Button>
-          )}
-          
+         
           {/* Clear Search */}
           {filters.location && (
             <Button

@@ -28,7 +28,7 @@ const CardCompact = ({
       <div className="relative w-1/3">
         <Image
           src={imgSrc}
-          alt={post.title}
+          alt={post.title || "Untitled Post"}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

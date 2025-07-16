@@ -17,6 +17,15 @@ const Map = () => {
     
     const filters = useAppSelector((state) => state.global.filters)
 
+    // DEBUG: Add comprehensive logging
+    console.log('🗺️ Map component render:', {
+        userLocation,
+        filters,
+        mapboxToken: !!process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
+        mapRef: !!mapRef.current,
+        containerRef: !!mapContainerRef.current
+    });
+
     const { data: posts, isLoading, error } = useGetPostsQuery({
         location: filters.location,
         tags: filters.tags,
@@ -27,21 +36,29 @@ const Map = () => {
 
     // Get user location (only once on mount)
     useEffect(() => {
+        console.log('🌍 Starting geolocation useEffect');
+        
         if (navigator.geolocation) {
+            console.log('📍 Geolocation available, requesting position...');
             navigator.geolocation.getCurrentPosition(
                 (position) => {
+                    console.log('✅ Geolocation success:', position.coords);
                     const { longitude, latitude } = position.coords;
                     const coords = [longitude, latitude] as [number, number];
                     setUserLocation(coords);
                     // Only set coordinates if no search coordinates exist
                     if (!filters.coordinates) {
+                        console.log('🎯 Setting coordinates in filters:', coords);
                         dispatch(setFilters({ coordinates: coords }));
+                    } else {
+                        console.log('🎯 Coordinates already exist in filters:', filters.coordinates);
                     }
                 },
                 (error) => {
-                    console.log('Geolocation error:', error);
+                    console.log('❌ Geolocation error:', error);
                     // Fallback to New York
                     const fallbackCoords = [-74.0060, 40.7128] as [number, number];
+                    console.log('🏙️ Using fallback coordinates:', fallbackCoords);
                     setUserLocation(fallbackCoords);
                     // Only set coordinates if no search coordinates exist
                     if (!filters.coordinates) {
@@ -50,8 +67,10 @@ const Map = () => {
                 }
             );
         } else {
+            console.log('❌ Geolocation not supported');
             // Fallback to New York if geolocation not supported
             const fallbackCoords = [-74.0060, 40.7128] as [number, number];
+            console.log('🏙️ Using fallback coordinates (no geolocation):', fallbackCoords);
             setUserLocation(fallbackCoords);
             // Only set coordinates if no search coordinates exist
             if (!filters.coordinates) {
@@ -62,33 +81,69 @@ const Map = () => {
 
     // Initialize map
     useEffect(() => {
-        if (!mapContainerRef.current || !userLocation || mapRef.current) return;
-
-        mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
-        
-        mapRef.current = new mapboxgl.Map({
-            container: mapContainerRef.current,
-            style: "mapbox://styles/mapbox/streets-v11",
-            center: userLocation,
-            zoom: 12,
+        console.log('🗺️ Map initialization useEffect triggered:', {
+            hasContainer: !!mapContainerRef.current,
+            hasUserLocation: !!userLocation,
+            hasExistingMap: !!mapRef.current,
+            mapboxToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.substring(0, 10) + '...'
         });
 
-        // Add navigation controls
-        mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        if (!mapContainerRef.current) {
+            console.log('❌ No map container ref');
+            return;
+        }
+        if (!userLocation) {
+            console.log('❌ No user location yet');
+            return;
+        }
+        if (mapRef.current) {
+            console.log('❌ Map already exists');
+            return;
+        }
 
-        // Add geolocation control
-        mapRef.current.addControl(
-            new mapboxgl.GeolocateControl({
-                positionOptions: {
-                    enableHighAccuracy: true,
-                },
-                trackUserLocation: true,
-                showUserHeading: true,
-            }),
-            'top-right'
-        );
+        const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+        if (!token) {
+            console.error('❌ CRITICAL: Mapbox token not available!');
+            return;
+        }
+
+        console.log('🚀 Initializing Mapbox map...');
+        
+        try {
+            mapboxgl.accessToken = token;
+            
+            mapRef.current = new mapboxgl.Map({
+                container: mapContainerRef.current,
+                style: "mapbox://styles/mapbox/streets-v11",
+                center: userLocation,
+                zoom: 12,
+            });
+
+            console.log('✅ Mapbox map created successfully');
+
+            // Add navigation controls
+            mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+            // Add geolocation control
+            mapRef.current.addControl(
+                new mapboxgl.GeolocateControl({
+                    positionOptions: {
+                        enableHighAccuracy: true,
+                    },
+                    trackUserLocation: true,
+                    showUserHeading: true,
+                }),
+                'top-right'
+            );
+
+            console.log('✅ Map controls added');
+
+        } catch (error) {
+            console.error('❌ CRITICAL: Error initializing Mapbox map:', error);
+        }
 
         return () => {
+            console.log('🧹 Cleaning up map...');
             if (mapRef.current) {
                 mapRef.current.remove();
                 mapRef.current = null;

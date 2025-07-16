@@ -18,11 +18,16 @@ interface ApiError {
 }
 
 const PostBar = () => {
-    const {data: authUser} = useGetAuthUserQuery();
+    const {data: authUser, isLoading: authLoading, error: authError} = useGetAuthUserQuery();
     const [addFavorite] = useAddFavoritePostMutation();
     const [removeFavorite] = useRemoveFavoritePostMutation();
     const viewMode = useAppSelector((state) => state.global.viewMode);
     const filters = useAppSelector((state) => state.global.filters);
+
+    // Debug logging
+    console.log('Auth user:', authUser);
+    console.log('Auth loading:', authLoading);
+    console.log('Auth error:', authError);
 
     const {
         data: posts,
