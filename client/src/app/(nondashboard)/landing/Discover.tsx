@@ -30,14 +30,14 @@ const Discover = () => {
         
         >
             <h2 className='text-3xl font-semibold leading-tight text-gray-800'>Discover Your Scene, Authentically</h2>
-            <p className="mt-4 text-lg text-gray-600">From the music and the lighting to the crowd and the service—get the real feel of a place before you ever step inside. Our community-driven map helps you find the exact experience you&apos;re looking for.</p>
+            <p className="mt-4 text-lg text-gray-600">From the music and the lighting to the crowd and the service, get the real feel of a place before you ever step inside. Our community-driven map helps you find the exact experience you&apos;re looking for.</p>
         </motion.div>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 xl:gap-16'>
         {[
             {
                 imageSrc: "/landing-icon-wand.png", // Icon for discovery/search
                 title: "Find Your Perfect Vibe",
-                description: "Search by more than just location. Use community-driven tags like #QuietAtmosphere, #LGBTQFriendly, or #LiveMusic to find the exact experience you're looking for.",
+                description: "Search by more than just location. Use community-driven tags like #QuietAtmosphere, #GoodForDates, or #LiveMusic to find the exact experience you're looking for.",
             },
             {
                 imageSrc: "/landing-icon-calendar.png", // Suggested: Icon for authentic content

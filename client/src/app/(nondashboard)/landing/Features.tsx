@@ -29,7 +29,7 @@ const Features = () => {
           className='text-3xl font-bold text-center mb-12 w-full sm:w-2/3 mx-auto'
         
         >
-          Placeholder
+          Features
         </motion.h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 xl:gap-16'>
           {[0,1,2].map((idx) =>(
@@ -59,9 +59,9 @@ const Features = () => {
                 }
                 hrefText={
                   [
-                    "/find",
-                    "/post",
-                    "/connect"
+                    "/search",
+                    "/search",
+                    "/search"
                   ][idx]
                 }
               >
